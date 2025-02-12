@@ -1,0 +1,33 @@
+name: Build and Test MAUI Android App
+
+on:
+  push:
+
+
+jobs:
+  build:
+    runs-on: windows-latest
+
+    steps:
+    # Checkout the repository
+    - name: Checkout Repository
+      uses: actions/checkout@v3
+
+    # Setup .NET SDK (for MAUI)
+    #- name: Set up .NET SDK
+    #  uses: actions/setup-dotnet@v3
+    #  with:
+    #    dotnet-version: '8.0'  # Specify the .NET version (MAUI works on .NET 7+)
+
+    # Restore dependencies
+    - name: Restore Dependencies
+      run: dotnet restore
+
+    # Build the project
+    - name: Build the MAUI Android Project
+      run: dotnet build --configuration Release
+
+    # Test the Android project
+    - name: Run Android Tests
+      run: |
+        dotnet test --configuration Release --filter "Android"
