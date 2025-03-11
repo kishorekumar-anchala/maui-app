@@ -6,7 +6,7 @@ on:
 
 jobs:
   check-vc-runtime:
-    runs-on: windows-l2022
+    runs-on: windows-2022
 
     steps:
     - name: Check Installed Visual C++ Runtimes
