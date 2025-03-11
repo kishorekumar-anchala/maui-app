@@ -1,0 +1,34 @@
+name: Inspect Visual Studio Environment
+
+on:
+  push:
+  workflow_dispatch:
+
+jobs:
+  inspect-vs:
+    runs-on: windows-2022
+
+    steps:
+    - name: Inspect VS Installation
+      shell: pwsh
+      run: |
+        $vsPath = "C:\Program Files\Microsoft Visual Studio\2022"
+        if (Test-Path $vsPath) {
+            Write-Host "Listing installed components in: $vsPath"
+            Get-ChildItem -Path $vsPath -Recurse -ErrorAction SilentlyContinue | ForEach-Object {
+                Write-Output $_.FullName
+            } | Out-File -FilePath vs_components.txt -Encoding utf8
+            Write-Host "Component list saved to vs_components.txt"
+        } else {
+            Write-Host "Error: Visual Studio installation path not found: $vsPath"
+        }
+
+    - name: Display Results
+      shell: pwsh
+      run: |
+        if (Test-Path vs_components.txt) {
+            Write-Host "Displaying the first 20 lines of the components:"
+            Get-Content vs_components.txt -TotalCount 20
+        } else {
+            Write-Host "Error: No components file found."
+        }
