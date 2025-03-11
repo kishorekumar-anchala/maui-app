@@ -1,34 +1,34 @@
-name: Inspect Visual Studio Environment
+name: Inspect Visual C++ Redistributables
 
 on:
   push:
   workflow_dispatch:
 
 jobs:
-  inspect-vs:
-    runs-on: windows-2022
+  check-vc-runtime:
+    runs-on: windows-l2022
 
     steps:
-    - name: Inspect VS Installation
+    - name: Check Installed Visual C++ Runtimes
       shell: pwsh
       run: |
-        $vsPath = "C:\Program Files\Microsoft Visual Studio\2022"
-        if (Test-Path $vsPath) {
-            Write-Host "Listing installed components in: $vsPath"
-            Get-ChildItem -Path $vsPath -Recurse -ErrorAction SilentlyContinue | ForEach-Object {
-                Write-Output $_.FullName
-            } | Out-File -FilePath vs_components.txt -Encoding utf8
-            Write-Host "Component list saved to vs_components.txt"
-        } else {
-            Write-Host "Error: Visual Studio installation path not found: $vsPath"
-        }
+        Write-Host "Checking installed Visual C++ Redistributables..."
+        Get-ChildItem -Path "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall" |
+        ForEach-Object {
+            $DisplayName = $_.GetValue("DisplayName", $null)
+            $Version = $_.GetValue("DisplayVersion", $null)
+            if ($DisplayName -like "*Microsoft Visual C++*") {
+                Write-Output "$DisplayName - Version: $Version"
+            }
+        } | Out-File -FilePath vc_runtimes.txt -Encoding utf8
+        Write-Host "Visual C++ runtime details saved to vc_runtimes.txt"
 
-    - name: Display Results
+    - name: Display Visual C++ Runtimes
       shell: pwsh
       run: |
-        if (Test-Path vs_components.txt) {
-            Write-Host "Displaying the first 20 lines of the components:"
-            Get-Content vs_components.txt -TotalCount 20
+        if (Test-Path vc_runtimes.txt) {
+            Write-Host "Displaying installed Visual C++ runtimes:"
+            Get-Content vc_runtimes.txt
         } else {
-            Write-Host "Error: No components file found."
+            Write-Host "Error: vc_runtimes.txt not found."
         }
